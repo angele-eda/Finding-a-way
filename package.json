@@ -1,0 +1,25 @@
+{
+  "name": "kakao-route-planner",
+  "version": "1.0.0",
+  "description": "카카오맵을 이용한 다중 경로 계획 웹 애플리케이션",
+  "main": "index.html",
+  "scripts": {
+    "start": "http-server -p 8000 -o",
+    "dev": "http-server -p 8000 -o -c-1",
+    "build": "echo 'No build process required for static files'"
+  },
+  "keywords": [
+    "kakao",
+    "map",
+    "route",
+    "planner",
+    "navigation",
+    "javascript",
+    "web"
+  ],
+  "author": "AI Assistant",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

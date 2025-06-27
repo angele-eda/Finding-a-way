@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오맵 경로 계획기</title>
+    <link rel="stylesheet" href="style.css">
+    <meta name="description" content="카카오맵을 이용한 다중 경로 계획 웹 애플리케이션">
+    <meta name="keywords" content="카카오맵, 경로계획, 네비게이션, 지도">
+    <meta name="author" content="AI Assistant">
+    <meta property="og:title" content="카카오맵 경로 계획기">
+    <meta property="og:description" content="여러 지점을 추가하고 최적 경로를 찾아보세요!">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 카카오맵 경로 계획기</h1>
+            <p>여러 지점을 추가하고 최적 경로를 찾아보세요!</p>
+        </header>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="input-section">
+                    <h3>📍 지점 추가</h3>
+                    <div class="input-group">
+                        <input type="text" id="locationInput" placeholder="장소명 또는 주소를 입력하세요">
+                        <button id="addLocationBtn">추가</button>
+                    </div>
+                    
+                    <div class="location-list">
+                        <h4>추가된 지점들</h4>
+                        <ul id="locationList"></ul>
+                    </div>
+
+                    <div class="controls">
+                        <button id="findRouteBtn" class="primary-btn">최적 경로 찾기</button>
+                        <button id="findAlternativeBtn" class="secondary-btn">대안 경로 찾기</button>
+                        <button id="clearAllBtn" class="danger-btn">모두 지우기</button>
+                    </div>
+                </div>
+
+                <div class="route-info">
+                    <h3>📊 경로 정보</h3>
+                    <div id="routeInfo">
+                        <p>지점을 추가하고 경로를 찾아보세요.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="map-section">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-controls">
+                        <button id="currentLocationBtn" class="map-btn">📍 현재 위치</button>
+                        <button id="resetMapBtn" class="map-btn">🗺️ 지도 초기화</button>
+                        <button id="fitBoundsBtn" class="map-btn">🔍 전체 보기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="route-options">
+            <h3>🛣️ 경로 옵션</h3>
+            <div class="options-grid">
+                <div class="option-card">
+                    <h4>최적 경로</h4>
+                    <p>가장 빠른 경로</p>
+                    <button id="optimalRouteBtn" class="route-btn">선택</button>
+                </div>
+                <div class="option-card">
+                    <h4>대안 경로 1</h4>
+                    <p>다른 경로 옵션</p>
+                    <button id="altRoute1Btn" class="route-btn">선택</button>
+                </div>
+                <div class="option-card">
+                    <h4>대안 경로 2</h4>
+                    <p>추가 경로 옵션</p>
+                    <button id="altRoute2Btn" class="route-btn">선택</button>
+                </div>
+                <div class="option-card">
+                    <h4>대안 경로 3</h4>
+                    <p>다른 경로 옵션</p>
+                    <button id="altRoute3Btn" class="route-btn">선택</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2024 카카오맵 경로 계획기 | <a href="https://github.com/yourusername/kakao-route-planner" target="_blank">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=69ab3c8667cc563dc3c8e2b9da865d73&libraries=services"></script>
+    <script src="script.js"></script>
+</body>
+</html>
