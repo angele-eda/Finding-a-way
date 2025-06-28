@@ -2,19 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <title>OpenStreetMap 길찾기 앱</title>
+  <title>OpenStreetMap 다중 경로 길찾기</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
   <!-- Leaflet Routing Machine -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
   <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-
   <!-- Geocoder 플러그인 -->
   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
@@ -22,9 +19,44 @@
   <style>
     body { margin: 0; padding: 0; }
     #map { width: 100vw; height: 100vh; }
+    .search-bar {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 8px 12px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .search-bar input {
+      padding: 6px 10px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 14px;
+      width: 180px;
+    }
+    .search-bar button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: #37A69B;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .search-bar button:hover {
+      background: #0487D9;
+    }
     .info-box {
       position: absolute;
-      top: 10px;
+      top: 60px;
       left: 50%;
       transform: translateX(-50%);
       background: white;
@@ -35,57 +67,192 @@
       font-size: 14px;
       z-index: 999;
     }
-
+    .route-btns {
+      position: absolute;
+      top: 110px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      display: flex;
+      gap: 8px;
+    }
+    .route-btns button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #eee;
+      color: #333;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.2s;
+    }
+    .route-btns button.active, .route-btns button:hover {
+      background: #0487D9;
+      color: #fff;
+    }
     @media (max-width: 600px) {
-      .info-box {
-        top: 5px;
-        padding: 6px 10px;
-        font-size: 12px;
-      }
+      .search-bar, .info-box, .route-btns { left: 5%; transform: none; width: 90vw; }
+      .search-bar input { width: 90px; }
     }
   </style>
 </head>
-
 <body>
-<div class="info-box" id="route-info">출발지와 도착지를 설정하세요</div>
-<div id="map"></div>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="장소명 또는 주소 입력">
+    <button id="addStartBtn">출발지 추가</button>
+    <button id="addWaypointBtn">경유지 추가</button>
+    <button id="addEndBtn">도착지 추가</button>
+    <button id="clearBtn" style="background:#e53e3e;">모두 지우기</button>
+  </div>
+  <div class="route-btns" id="routeBtns" style="display:none;">
+    <button id="route1Btn" class="active">최상 경로 1</button>
+    <button id="route2Btn">경로 2</button>
+    <button id="route3Btn">경로 3</button>
+  </div>
+  <div class="info-box" id="route-info">출발지와 도착지를 설정하세요</div>
+  <div id="map"></div>
 
 <script>
-  const map = L.map('map').setView([37.5665, 126.9780], 13);
+let map = L.map('map').setView([37.5665, 126.9780], 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+}).addTo(map);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-  }).addTo(map);
+const geocoder = L.Control.Geocoder.nominatim();
+let waypoints = [null, null]; // [start, end]
+let viaPoints = []; // 경유지
+let routingControl = null;
+let currentRouteIndex = 0;
+let routesCache = [];
 
-  const geocoder = L.Control.Geocoder.nominatim();
-
-  const control = L.Routing.control({
-    waypoints: [
-      L.latLng(37.5665, 126.9780), // 출발지
-      L.latLng(37.5702, 126.9920)  // 도착지
-    ],
-    routeWhileDragging: true,
-    geocoder: geocoder,
-    show: true,
-    addWaypoints: true,
-    draggableWaypoints: true,
-    createMarker: function(i, wp, nWps) {
-      const marker = L.marker(wp.latLng, {
-        draggable: true
-      });
-      return marker;
+function updateRouteBtns() {
+  const btns = document.getElementById('routeBtns');
+  if (routesCache.length > 1) {
+    btns.style.display = '';
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('route' + (i+1) + 'Btn').classList.toggle('active', i === currentRouteIndex);
     }
-  }).addTo(map);
+  } else {
+    btns.style.display = 'none';
+  }
+}
 
-  control.on('routesfound', function(e) {
-    const route = e.routes[0];
-    const summary = route.summary;
-    const distance = (summary.totalDistance / 1000).toFixed(2); // km
-    const time = (summary.totalTime / 60).toFixed(0); // minutes
-    document.getElementById('route-info').innerHTML =
-      `한 길: ${distance} km / 예상 시간: ${time} 분`;
+function showRouteInfo(route) {
+  if (!route) {
+    document.getElementById('route-info').innerText = '출발지와 도착지를 설정하세요';
+    return;
+  }
+  const summary = route.summary;
+  const distance = (summary.totalDistance / 1000).toFixed(2);
+  const time = (summary.totalTime / 60).toFixed(0);
+  document.getElementById('route-info').innerHTML =
+    `경로: ${distance} km / 예상 시간: ${time} 분`;
+}
+
+function drawRoute(routeIndex=0) {
+  if (!routingControl) return;
+  routingControl.setWaypoints([
+    waypoints[0],
+    ...viaPoints,
+    waypoints[1]
+  ]);
+  routingControl.getRouter().route(
+    [waypoints[0], ...viaPoints, waypoints[1]],
+    (err, routes) => {
+      if (routes && routes[routeIndex]) {
+        routingControl.setRoutes([routes[routeIndex]]);
+        routesCache = routes;
+        currentRouteIndex = routeIndex;
+        updateRouteBtns();
+        showRouteInfo(routes[routeIndex]);
+      }
+    }
+  );
+}
+
+function clearAll() {
+  waypoints = [null, null];
+  viaPoints = [];
+  if (routingControl) {
+    routingControl.setWaypoints([]);
+    routingControl.spliceWaypoints(0, routingControl.getWaypoints().length);
+    routingControl.remove();
+    routingControl = null;
+  }
+  routesCache = [];
+  currentRouteIndex = 0;
+  updateRouteBtns();
+  document.getElementById('route-info').innerText = '출발지와 도착지를 설정하세요';
+}
+
+function addLocation(type) {
+  const input = document.getElementById('searchInput');
+  const query = input.value.trim();
+  if (!query) return;
+  geocoder.geocode(query, (results) => {
+    if (!results || !results.length) {
+      alert('장소를 찾을 수 없습니다.');
+      return;
+    }
+    const latlng = L.latLng(results[0].center.lat, results[0].center.lng);
+    if (type === 'start') {
+      waypoints[0] = latlng;
+      map.setView(latlng, 14);
+    } else if (type === 'end') {
+      waypoints[1] = latlng;
+      map.setView(latlng, 14);
+    } else if (type === 'via') {
+      viaPoints.push(latlng);
+      map.setView(latlng, 14);
+    }
+    input.value = '';
+    if (waypoints[0] && waypoints[1]) {
+      if (!routingControl) {
+        routingControl = L.Routing.control({
+          waypoints: [waypoints[0], ...viaPoints, waypoints[1]],
+          routeWhileDragging: true,
+          geocoder: geocoder,
+          show: false,
+          addWaypoints: false,
+          draggableWaypoints: true,
+          fitSelectedRoutes: true,
+          router: L.Routing.osrmv1({
+            serviceUrl: 'https://router.project-osrm.org/route/v1'
+          }),
+          createMarker: function(i, wp, nWps) {
+            let label = '';
+            if (i === 0) label = '출발';
+            else if (i === nWps-1) label = '도착';
+            else label = '경유';
+            return L.marker(wp.latLng, {
+              draggable: true
+            }).bindTooltip(label, {permanent:true, direction:'top', className:'marker-label'});
+          }
+        }).addTo(map);
+
+        routingControl.on('routesfound', function(e) {
+          routesCache = e.routes;
+          currentRouteIndex = 0;
+          updateRouteBtns();
+          showRouteInfo(e.routes[0]);
+        });
+      }
+      drawRoute(0);
+    }
   });
+}
+
+document.getElementById('addStartBtn').onclick = () => addLocation('start');
+document.getElementById('addEndBtn').onclick = () => addLocation('end');
+document.getElementById('addWaypointBtn').onclick = () => addLocation('via');
+document.getElementById('clearBtn').onclick = clearAll;
+
+document.getElementById('route1Btn').onclick = () => { if (routesCache[0]) drawRoute(0); };
+document.getElementById('route2Btn').onclick = () => { if (routesCache[1]) drawRoute(1); };
+document.getElementById('route3Btn').onclick = () => { if (routesCache[2]) drawRoute(2); };
+
 </script>
 </body>
 </html>
