@@ -1,258 +1,376 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>OpenStreetMap 다중 경로 길찾기</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- Leaflet Routing Machine -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css" />
-  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
-  <!-- Geocoder 플러그인 -->
-  <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
-
+  <meta charset="UTF-8" />
+  <title>디버깅 코드 사진 기록장</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { margin: 0; padding: 0; }
-    #map { width: 100vw; height: 100vh; }
-    .search-bar {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-      padding: 8px 12px;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1f2937;
       display: flex;
-      gap: 6px;
       align-items: center;
-    }
-    .search-bar input {
-      padding: 6px 10px;
-      border: 1px solid #bbb;
-      border-radius: 6px;
-      font-size: 14px;
-      width: 180px;
-    }
-    .search-bar button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      background: #37A69B;
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-      transition: background 0.2s;
-    }
-    .search-bar button:hover {
-      background: #0487D9;
-    }
-    .info-box {
-      position: absolute;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: white;
-      padding: 8px 16px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      font-family: sans-serif;
-      font-size: 14px;
-      z-index: 999;
-    }
-    .route-btns {
-      position: absolute;
-      top: 110px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1001;
-      display: flex;
+      justify-content: space-between;
       gap: 8px;
     }
-    .route-btns button {
-      padding: 6px 14px;
-      border: none;
-      border-radius: 6px;
-      background: #eee;
-      color: #333;
-      font-weight: bold;
-      cursor: pointer;
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+    header span {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid #1f2937;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .card + .card { margin-top: 16px; }
+
+    .form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    label {
       font-size: 13px;
-      transition: background 0.2s;
+      color: #9ca3af;
     }
-    .route-btns button.active, .route-btns button:hover {
-      background: #0487D9;
-      color: #fff;
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 14px;
     }
+    textarea {
+      min-height: 60px;
+      resize: vertical;
+    }
+    input[type="file"] {
+      font-size: 12px;
+      color: #e5e7eb;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #6b7280;
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #3b82f6;
+      color: white;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: #111827;
+      color: #9ca3af;
+      border: 1px solid #374151;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .item {
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #1f2937;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .item-img-wrap {
+      max-height: 220px;
+      overflow: hidden;
+      background: #020617;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .item img {
+      width: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    .item-body {
+      padding: 10px;
+      font-size: 13px;
+    }
+    .item-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .item-meta {
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+    .item-note {
+      font-size: 12px;
+      color: #d1d5db;
+      white-space: pre-wrap;
+    }
+    .item-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 6px 8px 8px;
+    }
+    .item-footer button {
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    .empty {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+    }
+
     @media (max-width: 600px) {
-      .search-bar, .info-box, .route-btns { left: 5%; transform: none; width: 90vw; }
-      .search-bar input { width: 90px; }
+      header h1 {
+        font-size: 16px;
+      }
+      main {
+        padding: 12px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="장소명 또는 주소 입력">
-    <button id="addStartBtn">출발지 추가</button>
-    <button id="addWaypointBtn">경유지 추가</button>
-    <button id="addEndBtn">도착지 추가</button>
-    <button id="clearBtn" style="background:#e53e3e;">모두 지우기</button>
-  </div>
-  <div class="route-btns" id="routeBtns" style="display:none;">
-    <button id="route1Btn" class="active">최상 경로 1</button>
-    <button id="route2Btn">경로 2</button>
-    <button id="route3Btn">경로 3</button>
-  </div>
-  <div class="info-box" id="route-info">출발지와 도착지를 설정하세요</div>
-  <div id="map"></div>
+  <header>
+    <div>
+      <h1>디버깅 코드 사진 기록장</h1>
+      <span>버그 상황을 사진으로 찍어서 모아두는 개인 노트</span>
+    </div>
+  </header>
 
-<script>
-let map = L.map('map').setView([37.5665, 126.9780], 13);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap'
-}).addTo(map);
+  <main>
+    <!-- 업로드 카드 -->
+    <section class="card">
+      <form id="uploadForm">
+        <div class="form-row">
+          <label for="title">제목 / 상황 요약</label>
+          <input id="title" type="text" placeholder="예: React에서 setState 이후 값이 안 바뀜" />
+        </div>
 
-const geocoder = L.Control.Geocoder.nominatim();
-let waypoints = [null, null]; // [start, end]
-let viaPoints = []; // 경유지
-let routingControl = null;
-let currentRouteIndex = 0;
-let routesCache = [];
+        <div class="form-row">
+          <label for="note">메모 (선택)</label>
+          <textarea id="note" placeholder="어떤 상황에서 버그가 발생했는지, 시도한 해결 방법 등 메모를 남겨두세요."></textarea>
+        </div>
 
-function updateRouteBtns() {
-  const btns = document.getElementById('routeBtns');
-  if (routesCache.length > 1) {
-    btns.style.display = '';
-    for (let i = 0; i < 3; i++) {
-      document.getElementById('route' + (i+1) + 'Btn').classList.toggle('active', i === currentRouteIndex);
-    }
-  } else {
-    btns.style.display = 'none';
-  }
-}
+        <div class="form-row">
+          <label for="image">
+            디버깅 화면 사진
+          </label>
+          <!-- capture 속성: 모바일에서 카메라 바로 열리도록 -->
+          <input id="image" type="file" accept="image/*" capture="environment" />
+          <div class="hint">
+            📸 휴대폰이면 카메라가 바로 열립니다.  
+            PC에서는 스크린샷 파일을 선택하면 됩니다.
+          </div>
+        </div>
 
-function showRouteInfo(route) {
-  if (!route) {
-    document.getElementById('route-info').innerText = '출발지와 도착지를 설정하세요';
-    return;
-  }
-  const summary = route.summary;
-  const distance = (summary.totalDistance / 1000).toFixed(2);
-  const time = (summary.totalTime / 60).toFixed(0);
-  document.getElementById('route-info').innerHTML =
-    `경로: ${distance} km / 예상 시간: ${time} 분`;
-}
+        <div class="btn-row">
+          <button type="button" class="secondary" id="clearAllBtn">전체 삭제</button>
+          <button type="submit" id="saveBtn">저장하기</button>
+        </div>
+      </form>
+    </section>
 
-function drawRoute(routeIndex=0) {
-  if (!routingControl) return;
-  routingControl.setWaypoints([
-    waypoints[0],
-    ...viaPoints,
-    waypoints[1]
-  ]);
-  routingControl.getRouter().route(
-    [waypoints[0], ...viaPoints, waypoints[1]],
-    (err, routes) => {
-      if (routes && routes[routeIndex]) {
-        routingControl.setRoutes([routes[routeIndex]]);
-        routesCache = routes;
-        currentRouteIndex = routeIndex;
-        updateRouteBtns();
-        showRouteInfo(routes[routeIndex]);
+    <!-- 갤러리 카드 -->
+    <section class="card">
+      <h2 style="margin-top:0; font-size:15px;">저장된 디버깅 사진들</h2>
+      <div id="gallery" class="gallery"></div>
+      <div id="emptyMsg" class="empty">아직 저장된 사진이 없습니다.</div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "debugPhotos_v1";
+
+    const uploadForm = document.getElementById("uploadForm");
+    const titleInput = document.getElementById("title");
+    const noteInput = document.getElementById("note");
+    const imageInput = document.getElementById("image");
+    const galleryEl = document.getElementById("gallery");
+    const emptyMsgEl = document.getElementById("emptyMsg");
+    const clearAllBtn = document.getElementById("clearAllBtn");
+    const saveBtn = document.getElementById("saveBtn");
+
+    function loadPhotos() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error("load error", e);
+        return [];
       }
     }
-  );
-}
 
-function clearAll() {
-  waypoints = [null, null];
-  viaPoints = [];
-  if (routingControl) {
-    routingControl.setWaypoints([]);
-    routingControl.spliceWaypoints(0, routingControl.getWaypoints().length);
-    routingControl.remove();
-    routingControl = null;
-  }
-  routesCache = [];
-  currentRouteIndex = 0;
-  updateRouteBtns();
-  document.getElementById('route-info').innerText = '출발지와 도착지를 설정하세요';
-}
-
-function addLocation(type) {
-  const input = document.getElementById('searchInput');
-  const query = input.value.trim();
-  if (!query) return;
-  geocoder.geocode(query, (results) => {
-    if (!results || !results.length) {
-      alert('장소를 찾을 수 없습니다.');
-      return;
+    function savePhotos(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
     }
-    const latlng = L.latLng(results[0].center.lat, results[0].center.lng);
-    if (type === 'start') {
-      waypoints[0] = latlng;
-      map.setView(latlng, 14);
-    } else if (type === 'end') {
-      waypoints[1] = latlng;
-      map.setView(latlng, 14);
-    } else if (type === 'via') {
-      viaPoints.push(latlng);
-      map.setView(latlng, 14);
-    }
-    input.value = '';
-    if (waypoints[0] && waypoints[1]) {
-      if (!routingControl) {
-        routingControl = L.Routing.control({
-          waypoints: [waypoints[0], ...viaPoints, waypoints[1]],
-          routeWhileDragging: true,
-          geocoder: geocoder,
-          show: false,
-          addWaypoints: false,
-          draggableWaypoints: true,
-          fitSelectedRoutes: true,
-          router: L.Routing.osrmv1({
-            serviceUrl: 'https://router.project-osrm.org/route/v1'
-          }),
-          createMarker: function(i, wp, nWps) {
-            let label = '';
-            if (i === 0) label = '출발';
-            else if (i === nWps-1) label = '도착';
-            else label = '경유';
-            return L.marker(wp.latLng, {
-              draggable: true
-            }).bindTooltip(label, {permanent:true, direction:'top', className:'marker-label'});
-          }
-        }).addTo(map);
 
-        routingControl.on('routesfound', function(e) {
-          routesCache = e.routes;
-          currentRouteIndex = 0;
-          updateRouteBtns();
-          showRouteInfo(e.routes[0]);
+    function formatDate(ts) {
+      const d = new Date(ts);
+      const yy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const dd = String(d.getDate()).padStart(2, "0");
+      const hh = String(d.getHours()).padStart(2, "0");
+      const mi = String(d.getMinutes()).padStart(2, "0");
+      return `${yy}-${mm}-${dd} ${hh}:${mi}`;
+    }
+
+    function render() {
+      const photos = loadPhotos();
+      galleryEl.innerHTML = "";
+      if (photos.length === 0) {
+        emptyMsgEl.style.display = "block";
+        return;
+      }
+      emptyMsgEl.style.display = "none";
+
+      photos
+        .sort((a, b) => b.createdAt - a.createdAt)
+        .forEach((p) => {
+          const item = document.createElement("div");
+          item.className = "item";
+
+          const imgWrap = document.createElement("div");
+          imgWrap.className = "item-img-wrap";
+          const img = document.createElement("img");
+          img.src = p.dataUrl;
+          img.alt = p.title || "디버깅 사진";
+          imgWrap.appendChild(img);
+
+          const body = document.createElement("div");
+          body.className = "item-body";
+
+          const title = document.createElement("div");
+          title.className = "item-title";
+          title.textContent = p.title || "(제목 없음)";
+
+          const meta = document.createElement("div");
+          meta.className = "item-meta";
+          meta.textContent = `촬영/저장 시각: ${formatDate(p.createdAt)}`;
+
+          const note = document.createElement("div");
+          note.className = "item-note";
+          note.textContent = p.note || "";
+
+          body.appendChild(title);
+          body.appendChild(meta);
+          if (p.note) body.appendChild(note);
+
+          const footer = document.createElement("div");
+          footer.className = "item-footer";
+          const delBtn = document.createElement("button");
+          delBtn.className = "secondary";
+          delBtn.textContent = "삭제";
+          delBtn.addEventListener("click", () => {
+            const remain = loadPhotos().filter((x) => x.id !== p.id);
+            savePhotos(remain);
+            render();
+          });
+          footer.appendChild(delBtn);
+
+          item.appendChild(imgWrap);
+          item.appendChild(body);
+          item.appendChild(footer);
+
+          galleryEl.appendChild(item);
         });
-      }
-      drawRoute(0);
     }
-  });
-}
 
-document.getElementById('addStartBtn').onclick = () => addLocation('start');
-document.getElementById('addEndBtn').onclick = () => addLocation('end');
-document.getElementById('addWaypointBtn').onclick = () => addLocation('via');
-document.getElementById('clearBtn').onclick = clearAll;
+    uploadForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const file = imageInput.files[0];
 
-document.getElementById('route1Btn').onclick = () => { if (routesCache[0]) drawRoute(0); };
-document.getElementById('route2Btn').onclick = () => { if (routesCache[1]) drawRoute(1); };
-document.getElementById('route3Btn').onclick = () => { if (routesCache[2]) drawRoute(2); };
+      if (!file) {
+        alert("디버깅 사진을 선택하거나 촬영해 주세요.");
+        return;
+      }
 
-</script>
+      saveBtn.disabled = true;
+      saveBtn.textContent = "저장 중...";
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const photos = loadPhotos();
+        const newItem = {
+          id: Date.now().toString() + Math.random().toString(16).slice(2),
+          title: titleInput.value.trim(),
+          note: noteInput.value.trim(),
+          dataUrl: reader.result,
+          createdAt: Date.now()
+        };
+        photos.push(newItem);
+        savePhotos(photos);
+        render();
+
+        // 폼 리셋
+        titleInput.value = "";
+        noteInput.value = "";
+        imageInput.value = "";
+        saveBtn.disabled = false;
+        saveBtn.textContent = "저장하기";
+      };
+      reader.onerror = () => {
+        alert("이미지 읽기 중 오류가 발생했습니다.");
+        saveBtn.disabled = false;
+        saveBtn.textContent = "저장하기";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+      if (!confirm("정말로 모든 디버깅 사진을 삭제할까요?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+    });
+
+    // 초기 렌더링
+    render();
+  </script>
 </body>
 </html>
