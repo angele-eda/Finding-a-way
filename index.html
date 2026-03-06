@@ -1,376 +1,878 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>디버깅 코드 사진 기록장</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
-    }
-    header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #1f2937;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 18px;
-    }
-    header span {
-      font-size: 12px;
-      color: #9ca3af;
-    }
-    main {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .card {
-      background: #020617;
-      border-radius: 12px;
-      padding: 16px;
-      border: 1px solid #1f2937;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-    .card + .card { margin-top: 16px; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>멋재이 홈 운동 트레이너</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --bg2:#111827;
+    --card:rgba(255,255,255,0.08);
+    --card2:rgba(255,255,255,0.05);
+    --line:rgba(255,255,255,0.12);
+    --text:#f8fafc;
+    --muted:#cbd5e1;
+    --accent:#8b5cf6;
+    --accent2:#22c55e;
+    --accent3:#f59e0b;
+    --danger:#ef4444;
+    --shadow:0 20px 50px rgba(0,0,0,.35);
+    --radius:24px;
+  }
 
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 12px;
-    }
-    label {
-      font-size: 13px;
-      color: #9ca3af;
-    }
-    input[type="text"],
-    textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid #374151;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 14px;
-    }
-    textarea {
-      min-height: 60px;
-      resize: vertical;
-    }
-    input[type="file"] {
-      font-size: 12px;
-      color: #e5e7eb;
-    }
+  *{box-sizing:border-box}
 
-    .hint {
-      font-size: 11px;
-      color: #6b7280;
-    }
+  body{
+    margin:0;
+    font-family:Inter,"Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top, rgba(139,92,246,.20), transparent 35%),
+      radial-gradient(circle at bottom right, rgba(34,197,94,.14), transparent 30%),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+    min-height:100vh;
+    padding:16px;
+  }
 
-    .btn-row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    button {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 13px;
-      cursor: pointer;
-      background: #3b82f6;
-      color: white;
-      font-weight: 600;
-    }
-    button.secondary {
-      background: #111827;
-      color: #9ca3af;
-      border: 1px solid #374151;
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    display:grid;
+    gap:16px;
+  }
 
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(14px);
+  }
 
-    .item {
-      background: #020617;
-      border-radius: 10px;
-      border: 1px solid #1f2937;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .item-img-wrap {
-      max-height: 220px;
-      overflow: hidden;
-      background: #020617;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .item img {
-      width: 100%;
-      display: block;
-      object-fit: contain;
-    }
-    .item-body {
-      padding: 10px;
-      font-size: 13px;
-    }
-    .item-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .item-meta {
-      font-size: 11px;
-      color: #6b7280;
-      margin-bottom: 4px;
-    }
-    .item-note {
-      font-size: 12px;
-      color: #d1d5db;
-      white-space: pre-wrap;
-    }
-    .item-footer {
-      display: flex;
-      justify-content: flex-end;
-      padding: 6px 8px 8px;
-    }
-    .item-footer button {
-      padding: 4px 10px;
-      font-size: 11px;
-    }
+  .top{
+    padding:18px;
+  }
 
-    .empty {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #6b7280;
-      text-align: center;
-    }
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--muted);
+    font-size:13px;
+  }
 
-    @media (max-width: 600px) {
-      header h1 {
-        font-size: 16px;
-      }
-      main {
-        padding: 12px;
-      }
+  h1{
+    margin:12px 0 6px;
+    font-size:clamp(28px, 6vw, 42px);
+    line-height:1.05;
+    letter-spacing:-.04em;
+  }
+
+  .sub{
+    margin:0;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:14px;
+  }
+
+  .hero{
+    padding:20px;
+  }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+
+  .chip{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--muted);
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:13px;
+  }
+
+  .exercise{
+    font-size:clamp(38px, 11vw, 82px);
+    font-weight:800;
+    line-height:.92;
+    letter-spacing:-.06em;
+    margin:8px 0 10px;
+  }
+
+  .detail{
+    color:var(--muted);
+    font-size:16px;
+    line-height:1.6;
+    min-height:48px;
+  }
+
+  .timer{
+    font-size:clamp(64px, 15vw, 126px);
+    font-weight:800;
+    line-height:.95;
+    letter-spacing:-.07em;
+    margin:18px 0 10px;
+  }
+
+  .progress-wrap{
+    margin-top:14px;
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--line);
+  }
+
+  .progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--accent), #a78bfa, var(--accent2));
+    transition:width .25s ease;
+  }
+
+  .meta{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:10px;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .controls{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:18px;
+  }
+
+  button{
+    border:0;
+    border-radius:18px;
+    padding:15px 16px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+
+  button:active{transform:scale(.98)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+
+  .primary{
+    background:linear-gradient(135deg,var(--accent),#7c3aed);
+    color:#fff;
+  }
+
+  .secondary{
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    border:1px solid var(--line);
+  }
+
+  .success{
+    background:linear-gradient(135deg,var(--accent2),#16a34a);
+    color:#fff;
+  }
+
+  .danger{
+    background:rgba(239,68,68,.18);
+    color:#fecaca;
+    border:1px solid rgba(239,68,68,.22);
+  }
+
+  .grid{
+    display:grid;
+    gap:16px;
+    grid-template-columns:1fr;
+  }
+
+  .panel{
+    padding:18px;
+  }
+
+  .panel h2{
+    margin:0 0 12px;
+    font-size:18px;
+    letter-spacing:-.02em;
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+
+  .row:last-child{border-bottom:0}
+
+  .label{
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  .small{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  select, input[type="number"]{
+    width:100%;
+    background:#0f172a;
+    color:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px;
+    font-size:14px;
+    outline:none;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .routine-list{
+    display:grid;
+    gap:10px;
+    margin-top:8px;
+  }
+
+  .routine-item{
+    border:1px solid var(--line);
+    background:var(--card2);
+    border-radius:16px;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .routine-item.active{
+    border-color:rgba(139,92,246,.7);
+    box-shadow:0 0 0 1px rgba(139,92,246,.4) inset;
+  }
+
+  .routine-name{
+    font-weight:800;
+    font-size:15px;
+  }
+
+  .routine-desc{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+  }
+
+  .count-box{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+  }
+
+  .count-card{
+    border:1px solid var(--line);
+    background:var(--card2);
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+  }
+
+  .count-num{
+    font-size:28px;
+    font-weight:900;
+    line-height:1;
+    letter-spacing:-.04em;
+  }
+
+  .count-label{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  .big-tap{
+    margin-top:12px;
+    width:100%;
+    min-height:72px;
+    font-size:20px;
+    border-radius:22px;
+    background:linear-gradient(135deg, #1d4ed8, #2563eb);
+    color:white;
+  }
+
+  .footer-note{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding-bottom:8px;
+  }
+
+  @media (min-width: 820px){
+    .grid{
+      grid-template-columns:1.1fr .9fr;
     }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>디버깅 코드 사진 기록장</h1>
-      <span>버그 상황을 사진으로 찍어서 모아두는 개인 노트</span>
+
+<div class="app">
+
+  <div class="card top">
+    <div class="badge">🏋️ 멋재이 전용 홈운동 웹</div>
+    <h1>운동 켜놓고 따라하는<br>여자 트레이너 모드</h1>
+    <p class="sub">푸쉬업 · 스쿼트 · 힙 쓰러스트 · 뒷다리 치기 루틴을 음성으로 안내해준다. 휴대폰에서 크게 눌러가며 쓸 수 있게 만들었다.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card hero">
+      <div class="chips">
+        <div class="chip" id="voiceStatus">음성 준비 전</div>
+        <div class="chip" id="saveStatus">루틴 저장됨</div>
+        <div class="chip" id="countdownStatus">3-2-1 카운트다운 ON</div>
+      </div>
+
+      <div class="exercise" id="exerciseName">준비</div>
+      <div class="detail" id="exerciseDetail">운동 시작을 누르면 음성으로 안내해줄게.</div>
+      <div class="timer" id="timer">00</div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="meta">
+        <span id="stepInfo">0 / 0</span>
+        <span id="phaseInfo">대기 중</span>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="startBtn">시작</button>
+        <button class="secondary" id="pauseBtn">일시정지</button>
+        <button class="success" id="resumeBtn">계속</button>
+        <button class="danger" id="stopBtn">정지</button>
+      </div>
+
+      <button class="big-tap" id="repBtn">💪 푸쉬업 1개 완료</button>
+
+      <div class="count-box">
+        <div class="count-card">
+          <div class="count-num" id="repCount">0</div>
+          <div class="count-label">현재 동작 횟수</div>
+        </div>
+        <div class="count-card">
+          <div class="count-num" id="todayCount">0</div>
+          <div class="count-label">오늘 총 탭 수</div>
+        </div>
+        <div class="count-card">
+          <div class="count-num" id="doneCount">0</div>
+          <div class="count-label">완료 동작 수</div>
+        </div>
+      </div>
     </div>
-  </header>
 
-  <main>
-    <!-- 업로드 카드 -->
-    <section class="card">
-      <form id="uploadForm">
-        <div class="form-row">
-          <label for="title">제목 / 상황 요약</label>
-          <input id="title" type="text" placeholder="예: React에서 setState 이후 값이 안 바뀜" />
+    <div style="display:grid;gap:16px;">
+      <div class="card panel">
+        <h2>설정</h2>
+
+        <div class="row" style="display:block;">
+          <div class="label" style="margin-bottom:8px;">여자 트레이너 음성 선택</div>
+          <select id="voiceSelect"></select>
+          <div class="small" style="margin-top:8px;">한국어 여성 음성이 있으면 그걸 쓰고, 없으면 한국어 기본 음성으로 간다.</div>
         </div>
 
-        <div class="form-row">
-          <label for="note">메모 (선택)</label>
-          <textarea id="note" placeholder="어떤 상황에서 버그가 발생했는지, 시도한 해결 방법 등 메모를 남겨두세요."></textarea>
+        <div class="row">
+          <div>
+            <div class="label">3-2-1 카운트다운</div>
+            <div class="small">운동 시작 전 카운트</div>
+          </div>
+          <input type="checkbox" id="countdownToggle" checked />
         </div>
 
-        <div class="form-row">
-          <label for="image">
-            디버깅 화면 사진
-          </label>
-          <!-- capture 속성: 모바일에서 카메라 바로 열리도록 -->
-          <input id="image" type="file" accept="image/*" capture="environment" />
-          <div class="hint">
-            📸 휴대폰이면 카메라가 바로 열립니다.  
-            PC에서는 스크린샷 파일을 선택하면 됩니다.
+        <div class="row">
+          <div>
+            <div class="label">음성 안내</div>
+            <div class="small">운동명과 완료 안내</div>
+          </div>
+          <input type="checkbox" id="voiceToggle" checked />
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">진동</div>
+            <div class="small">휴대폰이면 더 좋음</div>
+          </div>
+          <input type="checkbox" id="vibrateToggle" checked />
+        </div>
+
+        <div class="row" style="display:block;">
+          <div class="label" style="margin-bottom:8px;">시간 설정</div>
+          <div class="form-grid">
+            <div>
+              <div class="small" style="margin-bottom:6px;">운동 시간(초)</div>
+              <input type="number" id="exerciseSec" min="10" max="300" value="30" />
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:6px;">휴식 시간(초)</div>
+              <input type="number" id="restSec" min="5" max="120" value="15" />
+            </div>
           </div>
         </div>
 
-        <div class="btn-row">
-          <button type="button" class="secondary" id="clearAllBtn">전체 삭제</button>
-          <button type="submit" id="saveBtn">저장하기</button>
+        <div class="controls" style="margin-top:14px;">
+          <button class="secondary" id="loadVoicesBtn">음성 불러오기</button>
+          <button class="secondary" id="saveBtn">루틴 저장</button>
+          <button class="secondary" id="resetBtn">기본값 복원</button>
+          <button class="secondary" id="testVoiceBtn">음성 테스트</button>
         </div>
-      </form>
-    </section>
+      </div>
 
-    <!-- 갤러리 카드 -->
-    <section class="card">
-      <h2 style="margin-top:0; font-size:15px;">저장된 디버깅 사진들</h2>
-      <div id="gallery" class="gallery"></div>
-      <div id="emptyMsg" class="empty">아직 저장된 사진이 없습니다.</div>
-    </section>
-  </main>
+      <div class="card panel">
+        <h2>멋재이 루틴</h2>
+        <div class="routine-list" id="routineList"></div>
+      </div>
+    </div>
+  </div>
 
-  <script>
-    const STORAGE_KEY = "debugPhotos_v1";
+  <div class="footer-note">팁: 휴대폰에서는 처음 한 번 버튼을 눌러야 음성이 잘 나온다.</div>
+</div>
 
-    const uploadForm = document.getElementById("uploadForm");
-    const titleInput = document.getElementById("title");
-    const noteInput = document.getElementById("note");
-    const imageInput = document.getElementById("image");
-    const galleryEl = document.getElementById("gallery");
-    const emptyMsgEl = document.getElementById("emptyMsg");
-    const clearAllBtn = document.getElementById("clearAllBtn");
-    const saveBtn = document.getElementById("saveBtn");
+<script>
+  const DEFAULT_SETTINGS = {
+    exerciseSec: 30,
+    restSec: 15,
+    countdownOn: true,
+    voiceOn: true,
+    vibrateOn: true,
+    selectedVoice: ""
+  };
 
-    function loadPhotos() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return [];
-        return JSON.parse(raw);
-      } catch (e) {
-        console.error("load error", e);
-        return [];
-      }
+  const EXERCISES = [
+    { name: "푸쉬업", detail: "가슴으로 밀어 올려. 내려갈 때 천천히." },
+    { name: "스쿼트", detail: "엉덩이를 뒤로 빼고 내려가." },
+    { name: "힙 쓰러스트", detail: "위에서 엉덩이를 꽉 조여." },
+    { name: "뒷다리 치기", detail: "허리 말고 엉덩이에 힘 줘." }
+  ];
+
+  let settings = loadSettings();
+  let routine = buildRoutine();
+  let currentIndex = -1;
+  let timeLeft = 0;
+  let timer = null;
+  let paused = false;
+  let repCount = 0;
+  let todayCount = Number(localStorage.getItem("meotjaei_today_count") || 0);
+  let doneCount = 0;
+  let voices = [];
+  let selectedVoice = null;
+  let countdownActive = false;
+
+  const exerciseName = document.getElementById("exerciseName");
+  const exerciseDetail = document.getElementById("exerciseDetail");
+  const timerEl = document.getElementById("timer");
+  const progressBar = document.getElementById("progressBar");
+  const stepInfo = document.getElementById("stepInfo");
+  const phaseInfo = document.getElementById("phaseInfo");
+  const repCountEl = document.getElementById("repCount");
+  const todayCountEl = document.getElementById("todayCount");
+  const doneCountEl = document.getElementById("doneCount");
+  const repBtn = document.getElementById("repBtn");
+  const routineList = document.getElementById("routineList");
+  const voiceStatus = document.getElementById("voiceStatus");
+  const saveStatus = document.getElementById("saveStatus");
+  const countdownStatus = document.getElementById("countdownStatus");
+  const voiceSelect = document.getElementById("voiceSelect");
+
+  const exerciseSecInput = document.getElementById("exerciseSec");
+  const restSecInput = document.getElementById("restSec");
+  const countdownToggle = document.getElementById("countdownToggle");
+  const voiceToggle = document.getElementById("voiceToggle");
+  const vibrateToggle = document.getElementById("vibrateToggle");
+
+  function loadSettings(){
+    const saved = localStorage.getItem("meotjaei_workout_settings");
+    if(!saved) return { ...DEFAULT_SETTINGS };
+    try{
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+    }catch(e){
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+
+  function saveSettings(){
+    localStorage.setItem("meotjaei_workout_settings", JSON.stringify(settings));
+    saveStatus.textContent = "루틴 저장 완료";
+    setTimeout(() => {
+      saveStatus.textContent = "루틴 저장됨";
+    }, 1200);
+  }
+
+  function buildRoutine(){
+    const ex = Number(settings.exerciseSec);
+    const rest = Number(settings.restSec);
+
+    return [
+      { type:"exercise", name:"푸쉬업", time:ex, detail:"가슴으로 밀어 올려. 내려갈 때 천천히." },
+      { type:"rest", name:"휴식", time:rest, detail:"숨 고르고 다음 동작 준비." },
+      { type:"exercise", name:"스쿼트", time:ex, detail:"엉덩이를 뒤로 빼고 내려가." },
+      { type:"rest", name:"휴식", time:rest, detail:"다리 힘 풀고 준비." },
+      { type:"exercise", name:"힙 쓰러스트", time:ex, detail:"위에서 엉덩이를 꽉 조여." },
+      { type:"rest", name:"휴식", time:rest, detail:"마지막 동작 준비." },
+      { type:"exercise", name:"뒷다리 치기", time:ex, detail:"허리 말고 엉덩이에 힘 줘." }
+    ];
+  }
+
+  function renderRoutine(){
+    routineList.innerHTML = "";
+    routine.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "routine-item" + (idx === currentIndex ? " active" : "");
+      div.innerHTML = `
+        <div>
+          <div class="routine-name">${item.name}</div>
+          <div class="routine-desc">${item.detail}</div>
+        </div>
+        <div class="routine-desc">${item.time}초</div>
+      `;
+      routineList.appendChild(div);
+    });
+  }
+
+  function formatTime(sec){
+    return String(sec).padStart(2, "0");
+  }
+
+  function vibrate(ms=120){
+    if(settings.vibrateOn && navigator.vibrate){
+      navigator.vibrate(ms);
+    }
+  }
+
+  function getPreferredVoice(){
+    if(!voices.length) return null;
+
+    if(settings.selectedVoice){
+      const exact = voices.find(v => v.name === settings.selectedVoice);
+      if(exact) return exact;
     }
 
-    function savePhotos(list) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    const femaleKeywords = ["female","woman","siri","yuna","seoyeon","sooyeon","google"];
+    const koFemale = voices.find(v =>
+      /ko-KR/i.test(v.lang) &&
+      femaleKeywords.some(k => v.name.toLowerCase().includes(k))
+    );
+    if(koFemale) return koFemale;
+
+    const koAny = voices.find(v => /ko-KR/i.test(v.lang));
+    if(koAny) return koAny;
+
+    return voices[0] || null;
+  }
+
+  function loadVoices(){
+    voices = speechSynthesis.getVoices() || [];
+    voiceSelect.innerHTML = "";
+
+    if(!voices.length){
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "음성을 불러오지 못함";
+      voiceSelect.appendChild(opt);
+      voiceStatus.textContent = "음성 없음";
+      return;
     }
 
-    function formatDate(ts) {
-      const d = new Date(ts);
-      const yy = d.getFullYear();
-      const mm = String(d.getMonth() + 1).padStart(2, "0");
-      const dd = String(d.getDate()).padStart(2, "0");
-      const hh = String(d.getHours()).padStart(2, "0");
-      const mi = String(d.getMinutes()).padStart(2, "0");
-      return `${yy}-${mm}-${dd} ${hh}:${mi}`;
-    }
+    const koreanVoices = voices.filter(v => /ko|KR/i.test(v.lang) || /korean|한국/.test(v.name.toLowerCase()));
+    const list = koreanVoices.length ? koreanVoices : voices;
 
-    function render() {
-      const photos = loadPhotos();
-      galleryEl.innerHTML = "";
-      if (photos.length === 0) {
-        emptyMsgEl.style.display = "block";
-        return;
-      }
-      emptyMsgEl.style.display = "none";
-
-      photos
-        .sort((a, b) => b.createdAt - a.createdAt)
-        .forEach((p) => {
-          const item = document.createElement("div");
-          item.className = "item";
-
-          const imgWrap = document.createElement("div");
-          imgWrap.className = "item-img-wrap";
-          const img = document.createElement("img");
-          img.src = p.dataUrl;
-          img.alt = p.title || "디버깅 사진";
-          imgWrap.appendChild(img);
-
-          const body = document.createElement("div");
-          body.className = "item-body";
-
-          const title = document.createElement("div");
-          title.className = "item-title";
-          title.textContent = p.title || "(제목 없음)";
-
-          const meta = document.createElement("div");
-          meta.className = "item-meta";
-          meta.textContent = `촬영/저장 시각: ${formatDate(p.createdAt)}`;
-
-          const note = document.createElement("div");
-          note.className = "item-note";
-          note.textContent = p.note || "";
-
-          body.appendChild(title);
-          body.appendChild(meta);
-          if (p.note) body.appendChild(note);
-
-          const footer = document.createElement("div");
-          footer.className = "item-footer";
-          const delBtn = document.createElement("button");
-          delBtn.className = "secondary";
-          delBtn.textContent = "삭제";
-          delBtn.addEventListener("click", () => {
-            const remain = loadPhotos().filter((x) => x.id !== p.id);
-            savePhotos(remain);
-            render();
-          });
-          footer.appendChild(delBtn);
-
-          item.appendChild(imgWrap);
-          item.appendChild(body);
-          item.appendChild(footer);
-
-          galleryEl.appendChild(item);
-        });
-    }
-
-    uploadForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const file = imageInput.files[0];
-
-      if (!file) {
-        alert("디버깅 사진을 선택하거나 촬영해 주세요.");
-        return;
-      }
-
-      saveBtn.disabled = true;
-      saveBtn.textContent = "저장 중...";
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        const photos = loadPhotos();
-        const newItem = {
-          id: Date.now().toString() + Math.random().toString(16).slice(2),
-          title: titleInput.value.trim(),
-          note: noteInput.value.trim(),
-          dataUrl: reader.result,
-          createdAt: Date.now()
-        };
-        photos.push(newItem);
-        savePhotos(photos);
-        render();
-
-        // 폼 리셋
-        titleInput.value = "";
-        noteInput.value = "";
-        imageInput.value = "";
-        saveBtn.disabled = false;
-        saveBtn.textContent = "저장하기";
-      };
-      reader.onerror = () => {
-        alert("이미지 읽기 중 오류가 발생했습니다.");
-        saveBtn.disabled = false;
-        saveBtn.textContent = "저장하기";
-      };
-      reader.readAsDataURL(file);
+    list.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      voiceSelect.appendChild(opt);
     });
 
-    clearAllBtn.addEventListener("click", () => {
-      if (!confirm("정말로 모든 디버깅 사진을 삭제할까요?")) return;
-      localStorage.removeItem(STORAGE_KEY);
-      render();
-    });
+    selectedVoice = getPreferredVoice();
+    if(selectedVoice){
+      voiceSelect.value = selectedVoice.name;
+      voiceStatus.textContent = `음성: ${selectedVoice.name}`;
+    }else{
+      voiceStatus.textContent = "음성 준비됨";
+    }
+  }
 
-    // 초기 렌더링
-    render();
-  </script>
+  function speak(text){
+    if(!settings.voiceOn) return;
+    speechSynthesis.cancel();
+
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "ko-KR";
+    msg.pitch = 1.15;
+    msg.rate = 0.95;
+
+    selectedVoice = getPreferredVoice();
+    if(selectedVoice) msg.voice = selectedVoice;
+
+    speechSynthesis.speak(msg);
+  }
+
+  function updateUI(){
+    const item = routine[currentIndex];
+    if(!item){
+      exerciseName.textContent = "준비";
+      exerciseDetail.textContent = "운동 시작을 누르면 음성으로 안내해줄게.";
+      timerEl.textContent = "00";
+      stepInfo.textContent = `0 / ${routine.length}`;
+      phaseInfo.textContent = "대기 중";
+      progressBar.style.width = "0%";
+      renderRoutine();
+      return;
+    }
+
+    exerciseName.textContent = item.name;
+    exerciseDetail.textContent = item.detail;
+    timerEl.textContent = formatTime(timeLeft);
+    stepInfo.textContent = `${currentIndex + 1} / ${routine.length}`;
+    phaseInfo.textContent = item.type === "rest" ? "휴식" : "운동";
+    progressBar.style.width = `${((item.time - timeLeft) / item.time) * 100}%`;
+
+    repCountEl.textContent = repCount;
+    todayCountEl.textContent = todayCount;
+    doneCountEl.textContent = doneCount;
+    repBtn.textContent = item.type === "exercise" ? `💪 ${item.name} 1개 완료` : "😌 휴식 중";
+    repBtn.disabled = item.type !== "exercise";
+
+    renderRoutine();
+  }
+
+  function setCurrent(index){
+    currentIndex = index;
+    repCount = 0;
+
+    if(currentIndex >= routine.length){
+      finishWorkout();
+      return;
+    }
+
+    timeLeft = routine[currentIndex].time;
+    updateUI();
+  }
+
+  function nextStep(){
+    clearInterval(timer);
+    timer = null;
+    doneCount++;
+    setCurrent(currentIndex + 1);
+    if(currentIndex < routine.length){
+      runStep();
+    }
+  }
+
+  async function runCountdown(){
+    if(!settings.countdownOn){
+      return true;
+    }
+
+    countdownActive = true;
+    countdownStatus.textContent = "3-2-1 카운트다운 ON";
+    const item = routine[currentIndex];
+
+    for(let i = 3; i >= 1; i--){
+      exerciseName.textContent = `${i}`;
+      exerciseDetail.textContent = `${item.name} 시작 준비`;
+      timerEl.textContent = formatTime(item.time);
+      progressBar.style.width = "0%";
+      if(settings.voiceOn) speak(String(i));
+      vibrate(80);
+      await sleep(1000);
+      if(paused || currentIndex < 0){
+        countdownActive = false;
+        return false;
+      }
+    }
+
+    countdownActive = false;
+    return true;
+  }
+
+  async function runStep(){
+    const item = routine[currentIndex];
+    if(!item) return;
+
+    if(item.type === "exercise"){
+      const ok = await runCountdown();
+      if(!ok) return;
+    }
+
+    updateUI();
+    speak(item.type === "rest" ? "휴식" : `${item.name} 시작`);
+    vibrate(item.type === "rest" ? 100 : 160);
+
+    timer = setInterval(() => {
+      if(paused) return;
+
+      timeLeft--;
+      updateUI();
+
+      if(timeLeft <= 0){
+        nextStep();
+      }
+    }, 1000);
+  }
+
+  function startWorkout(){
+    stopWorkout(false);
+    paused = false;
+    doneCount = 0;
+    setCurrent(0);
+    runStep();
+  }
+
+  function pauseWorkout(){
+    if(currentIndex < 0) return;
+    paused = true;
+    speechSynthesis.cancel();
+    phaseInfo.textContent = "일시정지";
+  }
+
+  function resumeWorkout(){
+    if(currentIndex < 0) return;
+    paused = false;
+    if(settings.voiceOn) speak("계속");
+    phaseInfo.textContent = routine[currentIndex].type === "rest" ? "휴식" : "운동";
+  }
+
+  function stopWorkout(announce=true){
+    clearInterval(timer);
+    timer = null;
+    paused = false;
+    countdownActive = false;
+    currentIndex = -1;
+    repCount = 0;
+    doneCount = 0;
+    speechSynthesis.cancel();
+    if(announce && settings.voiceOn){
+      speak("운동 정지");
+    }
+    updateUI();
+  }
+
+  function finishWorkout(){
+    clearInterval(timer);
+    timer = null;
+    exerciseName.textContent = "완료 👍";
+    exerciseDetail.textContent = "잘했다. 오늘 루틴 끝.";
+    timerEl.textContent = "00";
+    progressBar.style.width = "100%";
+    phaseInfo.textContent = "운동 완료";
+    stepInfo.textContent = `${routine.length} / ${routine.length}`;
+    repBtn.disabled = true;
+    repBtn.textContent = "✅ 완료";
+    speak("운동 완료. 잘했어요.");
+    vibrate([120,80,120]);
+  }
+
+  function repTap(){
+    if(currentIndex < 0) return;
+    const item = routine[currentIndex];
+    if(!item || item.type !== "exercise") return;
+
+    repCount++;
+    todayCount++;
+    localStorage.setItem("meotjaei_today_count", String(todayCount));
+    updateUI();
+    vibrate(30);
+  }
+
+  function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function syncForm(){
+    exerciseSecInput.value = settings.exerciseSec;
+    restSecInput.value = settings.restSec;
+    countdownToggle.checked = settings.countdownOn;
+    voiceToggle.checked = settings.voiceOn;
+    vibrateToggle.checked = settings.vibrateOn;
+    countdownStatus.textContent = settings.countdownOn ? "3-2-1 카운트다운 ON" : "3-2-1 카운트다운 OFF";
+  }
+
+  function applyForm(){
+    settings.exerciseSec = Number(exerciseSecInput.value) || 30;
+    settings.restSec = Number(restSecInput.value) || 15;
+    settings.countdownOn = countdownToggle.checked;
+    settings.voiceOn = voiceToggle.checked;
+    settings.vibrateOn = vibrateToggle.checked;
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+    routine = buildRoutine();
+    saveSettings();
+    updateUI();
+    renderRoutine();
+  }
+
+  document.getElementById("startBtn").addEventListener("click", startWorkout);
+  document.getElementById("pauseBtn").addEventListener("click", pauseWorkout);
+  document.getElementById("resumeBtn").addEventListener("click", resumeWorkout);
+  document.getElementById("stopBtn").addEventListener("click", () => stopWorkout(true));
+  document.getElementById("repBtn").addEventListener("click", repTap);
+
+  document.getElementById("saveBtn").addEventListener("click", applyForm);
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    settings = { ...DEFAULT_SETTINGS };
+    routine = buildRoutine();
+    saveSettings();
+    syncForm();
+    loadVoices();
+    stopWorkout(false);
+    renderRoutine();
+  });
+
+  document.getElementById("testVoiceBtn").addEventListener("click", () => {
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+    speak("멋재이, 운동 시작할게.");
+  });
+
+  document.getElementById("loadVoicesBtn").addEventListener("click", () => {
+    loadVoices();
+    speak("음성 준비 완료");
+  });
+
+  voiceSelect.addEventListener("change", () => {
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+  });
+
+  exerciseSecInput.addEventListener("change", applyForm);
+  restSecInput.addEventListener("change", applyForm);
+  countdownToggle.addEventListener("change", applyForm);
+  voiceToggle.addEventListener("change", applyForm);
+  vibrateToggle.addEventListener("change", applyForm);
+
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+
+  syncForm();
+  loadVoices();
+  updateUI();
+  renderRoutine();
+  todayCountEl.textContent = todayCount;
+</script>
 </body>
 </html>
