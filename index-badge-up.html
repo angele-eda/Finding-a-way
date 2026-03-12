@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>멋재이 홈 운동 트레이너</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --bg2:#111827;
+    --card:rgba(255,255,255,0.08);
+    --card2:rgba(255,255,255,0.05);
+    --line:rgba(255,255,255,0.12);
+    --text:#f8fafc;
+    --muted:#cbd5e1;
+    --accent:#8b5cf6;
+    --accent2:#22c55e;
+    --danger:#ef4444;
+    --shadow:0 20px 50px rgba(0,0,0,.35);
+    --radius:24px;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    font-family:Inter,"Noto Sans KR",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top, rgba(139,92,246,.20), transparent 35%),
+      radial-gradient(circle at bottom right, rgba(34,197,94,.14), transparent 30%),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+    min-height:100vh;
+    padding:16px;
+  }
+
+  .app{
+    max-width:900px;
+    margin:0 auto;
+    display:grid;
+    gap:16px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    backdrop-filter:blur(14px);
+  }
+
+  .top{
+    padding:18px;
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  h1{
+    margin:12px 0 6px;
+    font-size:clamp(28px, 6vw, 42px);
+    line-height:1.05;
+    letter-spacing:-.04em;
+  }
+
+  .sub{
+    margin:0;
+    color:var(--muted);
+    line-height:1.55;
+    font-size:14px;
+  }
+
+  .hero{
+    padding:20px;
+  }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+
+  .chip{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.05);
+    color:var(--muted);
+    border-radius:999px;
+    padding:8px 12px;
+    font-size:13px;
+  }
+
+  .exercise-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    margin:8px 0 10px;
+  }
+
+  .exercise-title-wrap{
+    min-width:0;
+    flex:1;
+  }
+
+  .exercise{
+    font-size:clamp(38px, 11vw, 82px);
+    font-weight:800;
+    line-height:.92;
+    letter-spacing:-.06em;
+    margin:0;
+    word-break:keep-all;
+  }
+
+  .step-badge{
+    flex:0 0 auto;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,255,255,.14);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 38%),
+      linear-gradient(135deg, rgba(139,92,246,.32), rgba(34,197,94,.16));
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.05),
+      0 10px 20px rgba(0,0,0,.18);
+    position:relative;
+    top:-6px;
+  }
+
+  .step-badge.rest{
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.14), transparent 38%),
+      linear-gradient(135deg, rgba(96,165,250,.22), rgba(148,163,184,.14));
+  }
+
+  .step-badge.done{
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 38%),
+      linear-gradient(135deg, rgba(34,197,94,.36), rgba(16,185,129,.18));
+  }
+
+  .step-num{
+    font-size:23px;
+    font-weight:900;
+    line-height:1;
+    letter-spacing:-.04em;
+    color:#fff;
+  }
+
+  .step-total{
+    margin-top:2px;
+    font-size:9px;
+    color:var(--muted);
+    line-height:1;
+  }
+
+  .detail{
+    color:var(--muted);
+    font-size:16px;
+    line-height:1.6;
+    min-height:48px;
+  }
+
+  .timer{
+    font-size:clamp(64px, 15vw, 126px);
+    font-weight:800;
+    line-height:.95;
+    letter-spacing:-.07em;
+    margin:18px 0 10px;
+  }
+
+  .progress-wrap{
+    margin-top:14px;
+    width:100%;
+    height:14px;
+    border-radius:999px;
+    overflow:hidden;
+    background:rgba(255,255,255,.08);
+    border:1px solid var(--line);
+  }
+
+  .progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--accent), #a78bfa, var(--accent2));
+    transition:width .25s ease;
+  }
+
+  .meta{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:10px;
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .controls{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-top:18px;
+  }
+
+  button{
+    border:0;
+    border-radius:18px;
+    padding:15px 16px;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    transition:transform .12s ease, opacity .12s ease;
+  }
+
+  button:active{transform:scale(.98)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+
+  .primary{
+    background:linear-gradient(135deg,var(--accent),#7c3aed);
+    color:#fff;
+  }
+
+  .secondary{
+    background:rgba(255,255,255,.08);
+    color:#fff;
+    border:1px solid var(--line);
+  }
+
+  .success{
+    background:linear-gradient(135deg,var(--accent2),#16a34a);
+    color:#fff;
+  }
+
+  .danger{
+    background:rgba(239,68,68,.18);
+    color:#fecaca;
+    border:1px solid rgba(239,68,68,.22);
+  }
+
+  .grid{
+    display:grid;
+    gap:16px;
+    grid-template-columns:1fr;
+  }
+
+  .panel{
+    padding:18px;
+  }
+
+  .panel h2{
+    margin:0 0 12px;
+    font-size:18px;
+    letter-spacing:-.02em;
+  }
+
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+
+  .row:last-child{border-bottom:0}
+
+  .label{
+    font-size:14px;
+    color:var(--muted);
+  }
+
+  .small{
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  select, input[type="number"]{
+    width:100%;
+    background:#0f172a;
+    color:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:12px;
+    font-size:14px;
+    outline:none;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .routine-list{
+    display:grid;
+    gap:10px;
+    margin-top:8px;
+  }
+
+  .routine-item{
+    border:1px solid var(--line);
+    background:var(--card2);
+    border-radius:16px;
+    padding:12px 14px;
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .routine-item.active{
+    border-color:rgba(139,92,246,.7);
+    box-shadow:0 0 0 1px rgba(139,92,246,.4) inset;
+  }
+
+  .routine-name{
+    font-weight:800;
+    font-size:15px;
+  }
+
+  .routine-desc{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:4px;
+  }
+
+  .count-box{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:10px;
+    margin-top:12px;
+  }
+
+  .count-card{
+    border:1px solid var(--line);
+    background:var(--card2);
+    border-radius:18px;
+    padding:14px;
+    text-align:center;
+  }
+
+  .count-num{
+    font-size:28px;
+    font-weight:900;
+    line-height:1;
+    letter-spacing:-.04em;
+  }
+
+  .count-label{
+    color:var(--muted);
+    font-size:12px;
+    margin-top:6px;
+  }
+
+  .big-tap{
+    margin-top:12px;
+    width:100%;
+    min-height:72px;
+    font-size:20px;
+    border-radius:22px;
+    background:linear-gradient(135deg, #1d4ed8, #2563eb);
+    color:white;
+  }
+
+  .footer-note{
+    text-align:center;
+    color:var(--muted);
+    font-size:12px;
+    padding-bottom:8px;
+  }
+
+  input[type="checkbox"]{
+    width:20px;
+    height:20px;
+    accent-color:#8b5cf6;
+  }
+
+  @media (max-width: 520px){
+    .step-badge{
+      width:56px;
+      height:56px;
+    }
+
+    .step-num{
+      font-size:22px;
+    }
+
+    .step-total{
+      font-size:9px;
+    }
+  }
+
+  @media (min-width: 820px){
+    .grid{
+      grid-template-columns:1.1fr .9fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div class="card top">
+    <div class="badge">🏋️ 멋재이 전용 홈운동 웹</div>
+    <h1>운동 켜놓고 따라하는<br>여자 트레이너 모드</h1>
+    <p class="sub">푸쉬업 · 스쿼트 · 힙 쓰러스트 · 뒷다리 치기 루틴을 음성으로 안내해준다. 휴대폰에서 크게 눌러가며 쓸 수 있게 만들었다.</p>
+  </div>
+
+  <div class="grid">
+    <div class="card hero">
+      <div class="chips">
+        <div class="chip" id="voiceStatus">음성 준비 전</div>
+        <div class="chip" id="saveStatus">루틴 저장됨</div>
+        <div class="chip" id="countdownStatus">3-2-1 카운트다운 ON</div>
+      </div>
+
+      <div class="exercise-head">
+        <div class="exercise-title-wrap">
+          <div class="exercise" id="exerciseName">준비</div>
+        </div>
+
+        <div class="step-badge" id="stepBadge">
+          <div class="step-num" id="stepBadgeNum">0</div>
+          <div class="step-total" id="stepBadgeTotal">/7</div>
+        </div>
+      </div>
+
+      <div class="detail" id="exerciseDetail">운동 시작을 누르면 음성으로 안내해줄게.</div>
+      <div class="timer" id="timer">00</div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+
+      <div class="meta">
+        <span id="stepInfo">0 / 0</span>
+        <span id="phaseInfo">대기 중</span>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="startBtn">시작</button>
+        <button class="secondary" id="pauseBtn">일시정지</button>
+        <button class="success" id="resumeBtn">계속</button>
+        <button class="danger" id="stopBtn">정지</button>
+      </div>
+
+      <button class="big-tap" id="repBtn">💪 푸쉬업 1개 완료</button>
+
+      <div class="count-box">
+        <div class="count-card">
+          <div class="count-num" id="repCount">0</div>
+          <div class="count-label">현재 동작 횟수</div>
+        </div>
+        <div class="count-card">
+          <div class="count-num" id="todayCount">0</div>
+          <div class="count-label">오늘 총 탭 수</div>
+        </div>
+        <div class="count-card">
+          <div class="count-num" id="doneCount">0</div>
+          <div class="count-label">완료 동작 수</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;gap:16px;">
+      <div class="card panel">
+        <h2>설정</h2>
+
+        <div class="row" style="display:block;">
+          <div class="label" style="margin-bottom:8px;">여자 트레이너 음성 선택</div>
+          <select id="voiceSelect"></select>
+          <div class="small" style="margin-top:8px;">한국어 여성 음성이 있으면 그걸 쓰고, 없으면 한국어 기본 음성으로 간다.</div>
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">3-2-1 카운트다운</div>
+            <div class="small">운동 시작 전 카운트</div>
+          </div>
+          <input type="checkbox" id="countdownToggle" checked />
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">음성 안내</div>
+            <div class="small">운동명과 완료 안내</div>
+          </div>
+          <input type="checkbox" id="voiceToggle" checked />
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">진동</div>
+            <div class="small">휴대폰이면 더 좋음</div>
+          </div>
+          <input type="checkbox" id="vibrateToggle" checked />
+        </div>
+
+        <div class="row">
+          <div>
+            <div class="label">시계 소리</div>
+            <div class="small">운동 마지막 3초에만 작게 틱 소리</div>
+          </div>
+          <input type="checkbox" id="tickToggle" />
+        </div>
+
+        <div class="row" style="display:block;">
+          <div class="label" style="margin-bottom:8px;">시간 설정</div>
+          <div class="form-grid">
+            <div>
+              <div class="small" style="margin-bottom:6px;">운동 시간(초)</div>
+              <input type="number" id="exerciseSec" min="10" max="300" value="30" />
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:6px;">휴식 시간(초)</div>
+              <input type="number" id="restSec" min="5" max="120" value="15" />
+            </div>
+          </div>
+        </div>
+
+        <div class="controls" style="margin-top:14px;">
+          <button class="secondary" id="loadVoicesBtn">음성 불러오기</button>
+          <button class="secondary" id="saveBtn">루틴 저장</button>
+          <button class="secondary" id="resetBtn">기본값 복원</button>
+          <button class="secondary" id="testVoiceBtn">음성 테스트</button>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <h2>멋재이 루틴</h2>
+        <div class="routine-list" id="routineList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note">팁: 휴대폰에서는 처음 한 번 버튼을 눌러야 음성이 잘 나온다.</div>
+</div>
+
+<script>
+  const DEFAULT_SETTINGS = {
+    exerciseSec: 30,
+    restSec: 15,
+    countdownOn: true,
+    voiceOn: true,
+    vibrateOn: true,
+    tickOn: false,
+    selectedVoice: ""
+  };
+
+  let settings = loadSettings();
+  let routine = buildRoutine();
+  let currentIndex = -1;
+  let timeLeft = 0;
+  let timer = null;
+  let paused = false;
+  let repCount = 0;
+  let todayCount = Number(localStorage.getItem("meotjaei_today_count") || 0);
+  let doneCount = 0;
+  let voices = [];
+  let selectedVoice = null;
+  let countdownActive = false;
+  let audioCtx = null;
+
+  const exerciseName = document.getElementById("exerciseName");
+  const exerciseDetail = document.getElementById("exerciseDetail");
+  const timerEl = document.getElementById("timer");
+  const progressBar = document.getElementById("progressBar");
+  const stepInfo = document.getElementById("stepInfo");
+  const phaseInfo = document.getElementById("phaseInfo");
+  const repCountEl = document.getElementById("repCount");
+  const todayCountEl = document.getElementById("todayCount");
+  const doneCountEl = document.getElementById("doneCount");
+  const repBtn = document.getElementById("repBtn");
+  const routineList = document.getElementById("routineList");
+  const voiceStatus = document.getElementById("voiceStatus");
+  const saveStatus = document.getElementById("saveStatus");
+  const countdownStatus = document.getElementById("countdownStatus");
+  const voiceSelect = document.getElementById("voiceSelect");
+  const stepBadge = document.getElementById("stepBadge");
+  const stepBadgeNum = document.getElementById("stepBadgeNum");
+  const stepBadgeTotal = document.getElementById("stepBadgeTotal");
+
+  const exerciseSecInput = document.getElementById("exerciseSec");
+  const restSecInput = document.getElementById("restSec");
+  const countdownToggle = document.getElementById("countdownToggle");
+  const voiceToggle = document.getElementById("voiceToggle");
+  const vibrateToggle = document.getElementById("vibrateToggle");
+  const tickToggle = document.getElementById("tickToggle");
+
+  function loadSettings(){
+    const saved = localStorage.getItem("meotjaei_workout_settings");
+    if(!saved) return { ...DEFAULT_SETTINGS };
+    try{
+      return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
+    }catch(e){
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+
+  function saveSettings(){
+    localStorage.setItem("meotjaei_workout_settings", JSON.stringify(settings));
+    saveStatus.textContent = "루틴 저장 완료";
+    setTimeout(() => {
+      saveStatus.textContent = "루틴 저장됨";
+    }, 1200);
+  }
+
+  function buildRoutine(){
+    const ex = Number(settings.exerciseSec);
+    const rest = Number(settings.restSec);
+
+    return [
+      { type:"exercise", name:"푸쉬업", time:ex, detail:"가슴으로 밀어 올려. 내려갈 때 천천히." },
+      { type:"rest", name:"휴식", time:rest, detail:"숨 고르고 다음 동작 준비." },
+      { type:"exercise", name:"스쿼트", time:ex, detail:"엉덩이를 뒤로 빼고 내려가." },
+      { type:"rest", name:"휴식", time:rest, detail:"다리 힘 풀고 준비." },
+      { type:"exercise", name:"힙 쓰러스트", time:ex, detail:"위에서 엉덩이를 꽉 조여." },
+      { type:"rest", name:"휴식", time:rest, detail:"마지막 동작 준비." },
+      { type:"exercise", name:"뒷다리 치기", time:ex, detail:"허리 말고 엉덩이에 힘 줘." }
+    ];
+  }
+
+  function renderRoutine(){
+    routineList.innerHTML = "";
+    routine.forEach((item, idx) => {
+      const div = document.createElement("div");
+      div.className = "routine-item" + (idx === currentIndex ? " active" : "");
+      div.innerHTML = `
+        <div>
+          <div class="routine-name">${item.name}</div>
+          <div class="routine-desc">${item.detail}</div>
+        </div>
+        <div class="routine-desc">${item.time}초</div>
+      `;
+      routineList.appendChild(div);
+    });
+  }
+
+  function formatTime(sec){
+    return String(sec).padStart(2, "0");
+  }
+
+  function vibrate(ms=120){
+    if(settings.vibrateOn && navigator.vibrate){
+      navigator.vibrate(ms);
+    }
+  }
+
+  function ensureAudioContext(){
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if(!AudioContextClass) return null;
+    if(!audioCtx || audioCtx.state === "closed"){
+      audioCtx = new AudioContextClass();
+    }
+    if(audioCtx.state === "suspended"){
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playTick(){
+    if(!settings.tickOn) return;
+    if(paused) return;
+
+    const item = routine[currentIndex];
+    if(!item) return;
+    if(item.type !== "exercise") return;
+    if(timeLeft > 3) return;
+
+    const ctx = ensureAudioContext();
+    if(!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = timeLeft === 1 ? 1550 : 1350;
+
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.025, ctx.currentTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.06);
+  }
+
+  function getPreferredVoice(){
+    if(!voices.length) return null;
+
+    if(settings.selectedVoice){
+      const exact = voices.find(v => v.name === settings.selectedVoice);
+      if(exact) return exact;
+    }
+
+    const femaleKeywords = ["female","woman","siri","yuna","seoyeon","sooyeon","google"];
+    const koFemale = voices.find(v =>
+      /ko-KR/i.test(v.lang) &&
+      femaleKeywords.some(k => v.name.toLowerCase().includes(k))
+    );
+    if(koFemale) return koFemale;
+
+    const koAny = voices.find(v => /ko-KR/i.test(v.lang));
+    if(koAny) return koAny;
+
+    return voices[0] || null;
+  }
+
+  function loadVoices(){
+    voices = speechSynthesis.getVoices() || [];
+    voiceSelect.innerHTML = "";
+
+    if(!voices.length){
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "음성을 불러오지 못함";
+      voiceSelect.appendChild(opt);
+      voiceStatus.textContent = "음성 없음";
+      return;
+    }
+
+    const koreanVoices = voices.filter(v => /ko|KR/i.test(v.lang) || /korean|한국/.test(v.name.toLowerCase()));
+    const list = koreanVoices.length ? koreanVoices : voices;
+
+    list.forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      voiceSelect.appendChild(opt);
+    });
+
+    selectedVoice = getPreferredVoice();
+    if(selectedVoice){
+      voiceSelect.value = selectedVoice.name;
+      voiceStatus.textContent = `음성: ${selectedVoice.name}`;
+    }else{
+      voiceStatus.textContent = "음성 준비됨";
+    }
+  }
+
+  function speak(text){
+    if(!settings.voiceOn) return;
+    speechSynthesis.cancel();
+
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "ko-KR";
+    msg.pitch = 1.15;
+    msg.rate = 0.95;
+
+    selectedVoice = getPreferredVoice();
+    if(selectedVoice) msg.voice = selectedVoice;
+
+    speechSynthesis.speak(msg);
+  }
+
+  function updateStepBadge(item){
+    if(!item){
+      stepBadge.className = "step-badge";
+      stepBadgeNum.textContent = "0";
+      stepBadgeTotal.textContent = `/${routine.length}`;
+      return;
+    }
+
+    if(currentIndex >= routine.length){
+      stepBadge.className = "step-badge done";
+      stepBadgeNum.textContent = "✓";
+      stepBadgeTotal.textContent = "완료";
+      return;
+    }
+
+    stepBadge.className = "step-badge" + (item.type === "rest" ? " rest" : "");
+    stepBadgeNum.textContent = String(currentIndex + 1);
+    stepBadgeTotal.textContent = `/${routine.length}`;
+  }
+
+  function updateUI(){
+    const item = routine[currentIndex];
+
+    repCountEl.textContent = repCount;
+    todayCountEl.textContent = todayCount;
+    doneCountEl.textContent = doneCount;
+
+    if(!item){
+      exerciseName.textContent = "준비";
+      exerciseDetail.textContent = "운동 시작을 누르면 음성으로 안내해줄게.";
+      timerEl.textContent = "00";
+      stepInfo.textContent = `0 / ${routine.length}`;
+      phaseInfo.textContent = "대기 중";
+      progressBar.style.width = "0%";
+      repBtn.textContent = "💪 푸쉬업 1개 완료";
+      repBtn.disabled = true;
+      updateStepBadge(null);
+      renderRoutine();
+      return;
+    }
+
+    exerciseName.textContent = item.name;
+    exerciseDetail.textContent = item.detail;
+    timerEl.textContent = formatTime(timeLeft);
+    stepInfo.textContent = `${currentIndex + 1} / ${routine.length}`;
+    phaseInfo.textContent = item.type === "rest" ? "휴식" : "운동";
+    progressBar.style.width = `${((item.time - timeLeft) / item.time) * 100}%`;
+
+    repBtn.textContent = item.type === "exercise" ? `💪 ${item.name} 1개 완료` : "😌 휴식 중";
+    repBtn.disabled = item.type !== "exercise";
+
+    updateStepBadge(item);
+    renderRoutine();
+  }
+
+  function setCurrent(index){
+    currentIndex = index;
+    repCount = 0;
+
+    if(currentIndex >= routine.length){
+      finishWorkout();
+      return;
+    }
+
+    timeLeft = routine[currentIndex].time;
+    updateUI();
+  }
+
+  function nextStep(){
+    clearInterval(timer);
+    timer = null;
+    doneCount++;
+    setCurrent(currentIndex + 1);
+    if(currentIndex < routine.length){
+      runStep();
+    }
+  }
+
+  async function runCountdown(){
+    if(!settings.countdownOn){
+      return true;
+    }
+
+    countdownActive = true;
+    countdownStatus.textContent = "3-2-1 카운트다운 ON";
+    const item = routine[currentIndex];
+
+    for(let i = 3; i >= 1; i--){
+      exerciseName.textContent = `${i}`;
+      exerciseDetail.textContent = `${item.name} 시작 준비`;
+      timerEl.textContent = formatTime(item.time);
+      progressBar.style.width = "0%";
+      stepBadge.className = "step-badge";
+      stepBadgeNum.textContent = String(currentIndex + 1);
+      stepBadgeTotal.textContent = `/${routine.length}`;
+
+      if(settings.voiceOn) speak(String(i));
+      vibrate(80);
+      await sleep(1000);
+
+      if(paused || currentIndex < 0){
+        countdownActive = false;
+        return false;
+      }
+    }
+
+    countdownActive = false;
+    return true;
+  }
+
+  async function runStep(){
+    const item = routine[currentIndex];
+    if(!item) return;
+
+    if(item.type === "exercise"){
+      const ok = await runCountdown();
+      if(!ok) return;
+    }
+
+    updateUI();
+    speak(item.type === "rest" ? "휴식" : `${item.name} 시작`);
+    vibrate(item.type === "rest" ? 100 : 160);
+
+    timer = setInterval(() => {
+      if(paused) return;
+
+      playTick();
+      timeLeft--;
+      updateUI();
+
+      if(timeLeft <= 0){
+        nextStep();
+      }
+    }, 1000);
+  }
+
+  function startWorkout(){
+    ensureAudioContext();
+    stopWorkout(false);
+    paused = false;
+    doneCount = 0;
+    setCurrent(0);
+    runStep();
+  }
+
+  function pauseWorkout(){
+    if(currentIndex < 0) return;
+    paused = true;
+    speechSynthesis.cancel();
+    phaseInfo.textContent = "일시정지";
+  }
+
+  function resumeWorkout(){
+    if(currentIndex < 0) return;
+    ensureAudioContext();
+    paused = false;
+    if(settings.voiceOn) speak("계속");
+    phaseInfo.textContent = routine[currentIndex].type === "rest" ? "휴식" : "운동";
+  }
+
+  function stopWorkout(announce=true){
+    clearInterval(timer);
+    timer = null;
+    paused = false;
+    countdownActive = false;
+    currentIndex = -1;
+    repCount = 0;
+    doneCount = 0;
+    speechSynthesis.cancel();
+    if(announce && settings.voiceOn){
+      speak("운동 정지");
+    }
+    updateUI();
+  }
+
+  function finishWorkout(){
+    clearInterval(timer);
+    timer = null;
+    exerciseName.textContent = "완료 👍";
+    exerciseDetail.textContent = "잘했다. 오늘 루틴 끝.";
+    timerEl.textContent = "00";
+    progressBar.style.width = "100%";
+    phaseInfo.textContent = "운동 완료";
+    stepInfo.textContent = `${routine.length} / ${routine.length}`;
+    repBtn.disabled = true;
+    repBtn.textContent = "✅ 완료";
+    repCountEl.textContent = repCount;
+    todayCountEl.textContent = todayCount;
+    doneCountEl.textContent = doneCount;
+    stepBadge.className = "step-badge done";
+    stepBadgeNum.textContent = "✓";
+    stepBadgeTotal.textContent = "완료";
+    speak("운동 완료. 잘했어요.");
+    vibrate([120,80,120]);
+  }
+
+  function repTap(){
+    if(currentIndex < 0) return;
+    const item = routine[currentIndex];
+    if(!item || item.type !== "exercise") return;
+
+    repCount++;
+    todayCount++;
+    localStorage.setItem("meotjaei_today_count", String(todayCount));
+    updateUI();
+    vibrate(30);
+  }
+
+  function sleep(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  function syncForm(){
+    exerciseSecInput.value = settings.exerciseSec;
+    restSecInput.value = settings.restSec;
+    countdownToggle.checked = settings.countdownOn;
+    voiceToggle.checked = settings.voiceOn;
+    vibrateToggle.checked = settings.vibrateOn;
+    tickToggle.checked = settings.tickOn;
+    countdownStatus.textContent = settings.countdownOn ? "3-2-1 카운트다운 ON" : "3-2-1 카운트다운 OFF";
+  }
+
+  function applyForm(){
+    settings.exerciseSec = Number(exerciseSecInput.value) || 30;
+    settings.restSec = Number(restSecInput.value) || 15;
+    settings.countdownOn = countdownToggle.checked;
+    settings.voiceOn = voiceToggle.checked;
+    settings.vibrateOn = vibrateToggle.checked;
+    settings.tickOn = tickToggle.checked;
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+    routine = buildRoutine();
+    saveSettings();
+    updateUI();
+    renderRoutine();
+  }
+
+  document.getElementById("startBtn").addEventListener("click", startWorkout);
+  document.getElementById("pauseBtn").addEventListener("click", pauseWorkout);
+  document.getElementById("resumeBtn").addEventListener("click", resumeWorkout);
+  document.getElementById("stopBtn").addEventListener("click", () => stopWorkout(true));
+  document.getElementById("repBtn").addEventListener("click", repTap);
+
+  document.getElementById("saveBtn").addEventListener("click", applyForm);
+
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    settings = { ...DEFAULT_SETTINGS };
+    routine = buildRoutine();
+    saveSettings();
+    syncForm();
+    loadVoices();
+    stopWorkout(false);
+    renderRoutine();
+  });
+
+  document.getElementById("testVoiceBtn").addEventListener("click", () => {
+    ensureAudioContext();
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+    speak("멋재이, 운동 시작할게.");
+  });
+
+  document.getElementById("loadVoicesBtn").addEventListener("click", () => {
+    ensureAudioContext();
+    loadVoices();
+    speak("음성 준비 완료");
+  });
+
+  voiceSelect.addEventListener("change", () => {
+    settings.selectedVoice = voiceSelect.value || "";
+    selectedVoice = getPreferredVoice();
+  });
+
+  exerciseSecInput.addEventListener("change", applyForm);
+  restSecInput.addEventListener("change", applyForm);
+  countdownToggle.addEventListener("change", applyForm);
+  voiceToggle.addEventListener("change", applyForm);
+  vibrateToggle.addEventListener("change", applyForm);
+  tickToggle.addEventListener("change", applyForm);
+
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+
+  syncForm();
+  loadVoices();
+  updateUI();
+  renderRoutine();
+  todayCountEl.textContent = todayCount;
+</script>
+</body>
+</html>
