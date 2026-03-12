@@ -323,6 +323,12 @@
     padding-bottom:8px;
   }
 
+  input[type="checkbox"]{
+    width:20px;
+    height:20px;
+    accent-color:#8b5cf6;
+  }
+
   @media (min-width: 820px){
     .grid{
       grid-template-columns:1.1fr .9fr;
@@ -420,6 +426,14 @@
           <input type="checkbox" id="vibrateToggle" checked />
         </div>
 
+        <div class="row">
+          <div>
+            <div class="label">시계 소리</div>
+            <div class="small">운동 마지막 3초에만 작게 틱 소리</div>
+          </div>
+          <input type="checkbox" id="tickToggle" />
+        </div>
+
         <div class="row" style="display:block;">
           <div class="label" style="margin-bottom:8px;">시간 설정</div>
           <div class="form-grid">
@@ -459,15 +473,9 @@
     countdownOn: true,
     voiceOn: true,
     vibrateOn: true,
+    tickOn: false,
     selectedVoice: ""
   };
-
-  const EXERCISES = [
-    { name: "푸쉬업", detail: "가슴으로 밀어 올려. 내려갈 때 천천히." },
-    { name: "스쿼트", detail: "엉덩이를 뒤로 빼고 내려가." },
-    { name: "힙 쓰러스트", detail: "위에서 엉덩이를 꽉 조여." },
-    { name: "뒷다리 치기", detail: "허리 말고 엉덩이에 힘 줘." }
-  ];
 
   let settings = loadSettings();
   let routine = buildRoutine();
@@ -481,6 +489,7 @@
   let voices = [];
   let selectedVoice = null;
   let countdownActive = false;
+  let audioCtx = null;
 
   const exerciseName = document.getElementById("exerciseName");
   const exerciseDetail = document.getElementById("exerciseDetail");
@@ -503,6 +512,7 @@
   const countdownToggle = document.getElementById("countdownToggle");
   const voiceToggle = document.getElementById("voiceToggle");
   const vibrateToggle = document.getElementById("vibrateToggle");
+  const tickToggle = document.getElementById("tickToggle");
 
   function loadSettings(){
     const saved = localStorage.getItem("meotjaei_workout_settings");
@@ -561,6 +571,47 @@
     if(settings.vibrateOn && navigator.vibrate){
       navigator.vibrate(ms);
     }
+  }
+
+  function ensureAudioContext(){
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if(!AudioContextClass) return null;
+    if(!audioCtx || audioCtx.state === "closed"){
+      audioCtx = new AudioContextClass();
+    }
+    if(audioCtx.state === "suspended"){
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playTick(){
+    if(!settings.tickOn) return;
+    if(paused) return;
+
+    const item = routine[currentIndex];
+    if(!item) return;
+    if(item.type !== "exercise") return;
+    if(timeLeft > 3) return;
+
+    const ctx = ensureAudioContext();
+    if(!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = timeLeft === 1 ? 1550 : 1350;
+
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.025, ctx.currentTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.06);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.06);
   }
 
   function getPreferredVoice(){
@@ -633,6 +684,11 @@
 
   function updateUI(){
     const item = routine[currentIndex];
+
+    repCountEl.textContent = repCount;
+    todayCountEl.textContent = todayCount;
+    doneCountEl.textContent = doneCount;
+
     if(!item){
       exerciseName.textContent = "준비";
       exerciseDetail.textContent = "운동 시작을 누르면 음성으로 안내해줄게.";
@@ -640,6 +696,8 @@
       stepInfo.textContent = `0 / ${routine.length}`;
       phaseInfo.textContent = "대기 중";
       progressBar.style.width = "0%";
+      repBtn.textContent = "💪 푸쉬업 1개 완료";
+      repBtn.disabled = true;
       renderRoutine();
       return;
     }
@@ -651,9 +709,6 @@
     phaseInfo.textContent = item.type === "rest" ? "휴식" : "운동";
     progressBar.style.width = `${((item.time - timeLeft) / item.time) * 100}%`;
 
-    repCountEl.textContent = repCount;
-    todayCountEl.textContent = todayCount;
-    doneCountEl.textContent = doneCount;
     repBtn.textContent = item.type === "exercise" ? `💪 ${item.name} 1개 완료` : "😌 휴식 중";
     repBtn.disabled = item.type !== "exercise";
 
@@ -700,6 +755,7 @@
       if(settings.voiceOn) speak(String(i));
       vibrate(80);
       await sleep(1000);
+
       if(paused || currentIndex < 0){
         countdownActive = false;
         return false;
@@ -726,6 +782,7 @@
     timer = setInterval(() => {
       if(paused) return;
 
+      playTick();
       timeLeft--;
       updateUI();
 
@@ -736,6 +793,7 @@
   }
 
   function startWorkout(){
+    ensureAudioContext();
     stopWorkout(false);
     paused = false;
     doneCount = 0;
@@ -752,6 +810,7 @@
 
   function resumeWorkout(){
     if(currentIndex < 0) return;
+    ensureAudioContext();
     paused = false;
     if(settings.voiceOn) speak("계속");
     phaseInfo.textContent = routine[currentIndex].type === "rest" ? "휴식" : "운동";
@@ -783,6 +842,9 @@
     stepInfo.textContent = `${routine.length} / ${routine.length}`;
     repBtn.disabled = true;
     repBtn.textContent = "✅ 완료";
+    repCountEl.textContent = repCount;
+    todayCountEl.textContent = todayCount;
+    doneCountEl.textContent = doneCount;
     speak("운동 완료. 잘했어요.");
     vibrate([120,80,120]);
   }
@@ -809,6 +871,7 @@
     countdownToggle.checked = settings.countdownOn;
     voiceToggle.checked = settings.voiceOn;
     vibrateToggle.checked = settings.vibrateOn;
+    tickToggle.checked = settings.tickOn;
     countdownStatus.textContent = settings.countdownOn ? "3-2-1 카운트다운 ON" : "3-2-1 카운트다운 OFF";
   }
 
@@ -818,6 +881,7 @@
     settings.countdownOn = countdownToggle.checked;
     settings.voiceOn = voiceToggle.checked;
     settings.vibrateOn = vibrateToggle.checked;
+    settings.tickOn = tickToggle.checked;
     settings.selectedVoice = voiceSelect.value || "";
     selectedVoice = getPreferredVoice();
     routine = buildRoutine();
@@ -845,12 +909,14 @@
   });
 
   document.getElementById("testVoiceBtn").addEventListener("click", () => {
+    ensureAudioContext();
     settings.selectedVoice = voiceSelect.value || "";
     selectedVoice = getPreferredVoice();
     speak("멋재이, 운동 시작할게.");
   });
 
   document.getElementById("loadVoicesBtn").addEventListener("click", () => {
+    ensureAudioContext();
     loadVoices();
     speak("음성 준비 완료");
   });
@@ -865,6 +931,7 @@
   countdownToggle.addEventListener("change", applyForm);
   voiceToggle.addEventListener("change", applyForm);
   vibrateToggle.addEventListener("change", applyForm);
+  tickToggle.addEventListener("change", applyForm);
 
   window.speechSynthesis.onvoiceschanged = loadVoices;
 
