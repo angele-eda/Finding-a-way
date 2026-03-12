@@ -100,12 +100,71 @@
     font-size:13px;
   }
 
+  .exercise-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:14px;
+    margin:8px 0 10px;
+  }
+
+  .exercise-title-wrap{
+    min-width:0;
+    flex:1;
+  }
+
   .exercise{
     font-size:clamp(38px, 11vw, 82px);
     font-weight:800;
     line-height:.92;
     letter-spacing:-.06em;
-    margin:8px 0 10px;
+    margin:0;
+    word-break:keep-all;
+  }
+
+  .step-badge{
+    flex:0 0 auto;
+    width:74px;
+    height:74px;
+    border-radius:50%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    border:1px solid rgba(255,255,255,.16);
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 38%),
+      linear-gradient(135deg, rgba(139,92,246,.38), rgba(34,197,94,.24));
+    box-shadow:
+      inset 0 0 0 1px rgba(255,255,255,.06),
+      0 12px 24px rgba(0,0,0,.22);
+  }
+
+  .step-badge.rest{
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.14), transparent 38%),
+      linear-gradient(135deg, rgba(96,165,250,.30), rgba(148,163,184,.18));
+  }
+
+  .step-badge.done{
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,.16), transparent 38%),
+      linear-gradient(135deg, rgba(34,197,94,.42), rgba(16,185,129,.24));
+  }
+
+  .step-num{
+    font-size:28px;
+    font-weight:900;
+    line-height:1;
+    letter-spacing:-.05em;
+  }
+
+  .step-total{
+    font-size:11px;
+    color:var(--muted);
+    margin-top:3px;
+    line-height:1;
   }
 
   .detail{
@@ -329,6 +388,21 @@
     accent-color:#8b5cf6;
   }
 
+  @media (max-width: 520px){
+    .step-badge{
+      width:64px;
+      height:64px;
+    }
+
+    .step-num{
+      font-size:24px;
+    }
+
+    .step-total{
+      font-size:10px;
+    }
+  }
+
   @media (min-width: 820px){
     .grid{
       grid-template-columns:1.1fr .9fr;
@@ -354,7 +428,17 @@
         <div class="chip" id="countdownStatus">3-2-1 카운트다운 ON</div>
       </div>
 
-      <div class="exercise" id="exerciseName">준비</div>
+      <div class="exercise-head">
+        <div class="exercise-title-wrap">
+          <div class="exercise" id="exerciseName">준비</div>
+        </div>
+
+        <div class="step-badge" id="stepBadge">
+          <div class="step-num" id="stepBadgeNum">0</div>
+          <div class="step-total" id="stepBadgeTotal">/7</div>
+        </div>
+      </div>
+
       <div class="detail" id="exerciseDetail">운동 시작을 누르면 음성으로 안내해줄게.</div>
       <div class="timer" id="timer">00</div>
 
@@ -506,6 +590,9 @@
   const saveStatus = document.getElementById("saveStatus");
   const countdownStatus = document.getElementById("countdownStatus");
   const voiceSelect = document.getElementById("voiceSelect");
+  const stepBadge = document.getElementById("stepBadge");
+  const stepBadgeNum = document.getElementById("stepBadgeNum");
+  const stepBadgeTotal = document.getElementById("stepBadgeTotal");
 
   const exerciseSecInput = document.getElementById("exerciseSec");
   const restSecInput = document.getElementById("restSec");
@@ -682,6 +769,26 @@
     speechSynthesis.speak(msg);
   }
 
+  function updateStepBadge(item){
+    if(!item){
+      stepBadge.className = "step-badge";
+      stepBadgeNum.textContent = "0";
+      stepBadgeTotal.textContent = `/${routine.length}`;
+      return;
+    }
+
+    if(currentIndex >= routine.length){
+      stepBadge.className = "step-badge done";
+      stepBadgeNum.textContent = "✓";
+      stepBadgeTotal.textContent = "완료";
+      return;
+    }
+
+    stepBadge.className = "step-badge" + (item.type === "rest" ? " rest" : "");
+    stepBadgeNum.textContent = String(currentIndex + 1);
+    stepBadgeTotal.textContent = `/${routine.length}`;
+  }
+
   function updateUI(){
     const item = routine[currentIndex];
 
@@ -698,6 +805,7 @@
       progressBar.style.width = "0%";
       repBtn.textContent = "💪 푸쉬업 1개 완료";
       repBtn.disabled = true;
+      updateStepBadge(null);
       renderRoutine();
       return;
     }
@@ -712,6 +820,7 @@
     repBtn.textContent = item.type === "exercise" ? `💪 ${item.name} 1개 완료` : "😌 휴식 중";
     repBtn.disabled = item.type !== "exercise";
 
+    updateStepBadge(item);
     renderRoutine();
   }
 
@@ -752,6 +861,9 @@
       exerciseDetail.textContent = `${item.name} 시작 준비`;
       timerEl.textContent = formatTime(item.time);
       progressBar.style.width = "0%";
+      stepBadge.className = "step-badge";
+      stepBadgeNum.textContent = String(currentIndex + 1);
+      stepBadgeTotal.textContent = `/${routine.length}`;
       if(settings.voiceOn) speak(String(i));
       vibrate(80);
       await sleep(1000);
@@ -845,6 +957,9 @@
     repCountEl.textContent = repCount;
     todayCountEl.textContent = todayCount;
     doneCountEl.textContent = doneCount;
+    stepBadge.className = "step-badge done";
+    stepBadgeNum.textContent = "✓";
+    stepBadgeTotal.textContent = "완료";
     speak("운동 완료. 잘했어요.");
     vibrate([120,80,120]);
   }
